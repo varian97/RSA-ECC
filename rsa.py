@@ -6,10 +6,6 @@ def generate_random(length=100):
     upper_bound = (10 ** length) - 1
     return random.randint(lower_bound, upper_bound)
 
-def read_file(pathname):
-    with open(pathname, 'r') as infile:
-        return infile.read()
-
 def miller_rabin_test(d, n):
     a = random.randint(2, n-2)
     x = pow(a, d, n)
@@ -75,12 +71,46 @@ class RSA(object):
 
         return (e, n), (d, n)
 
+    def encrypt(self, input_pathname, output_pathname, keys):
+        e, n = keys
+        with open(input_pathname, 'rb') as infile:
+            content = infile.read()
+
+        '''block_size = len(keys)-1
+        m = "".join(str(x) for x in content)'''
+        ciphertext = [pow(int(x), e, n) for x in content]
+
+        # save into file
+        with open(output_pathname, 'w') as outfile:
+            ciphertext_hexed = [hex(x) for x in ciphertext]
+            outfile.write(" ".join(ciphertext_hexed))
+
+        return " ".join(str(x) for x in ciphertext_hexed)
+
+    def decrypt(self, input_pathname, output_pathname, keys):
+        d, n = keys
+        with open(input_pathname, 'r') as infile:
+            content = infile.read()
+
+        content = content.split(" ")
+        '''block_size = len(keys-1)
+        m = "".join(str(x) for x in content)'''
+        content_integer = [int(x, 16) for x in content]
+        plaintext = [pow(x, d, n) for x in content_integer]
+
+        with open(output_pathname, 'wb') as outfile:
+            outfile.write(bytes(plaintext))
+
+        return plaintext
+
 
 if __name__ == "__main__":
     rsa = RSA()
-    p = rsa.generate_prime(length=2)
-    q = rsa.generate_prime(length=2)
+    p = rsa.generate_prime(length=20)
+    q = rsa.generate_prime(length=20)
     print("Prime number 1 = ", p)
     print("Prime number 2 = ", q)
 
     public_keys, private_keys = rsa.generate_keys(p, q)
+    ciphertext = rsa.encrypt('README.md', 'README_OUTPUT.txt', public_keys)
+    plaintext = rsa.decrypt('README_OUTPUT.txt', 'README_OUTPUT_DECRYPT', private_keys)
