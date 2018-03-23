@@ -247,9 +247,25 @@ class ECCipher:
         """
         :return: private key, public key tuple
         """
-        b = random.randint(0, self.p - 1)
-        pb = self.curve.iterate_point(self.g, b)
-        return b, pb
+        a = random.randint(0, self.p - 1)
+        pa = self.curve.iterate_point(self.g, a)
+        return a, pa
+
+    def gen_partial_key(self, a):
+        """
+        :param a: A private key with value 1 < a < p-1
+        :return: A partial Diffie-Hellman key
+        """
+        return self.curve.iterate_point(self.g, a)
+
+    def gen_shared_key(self, a, pt):
+        """
+        Generate a shared secret point from the given private key and partial key
+        :param a: A private key with value 1 < a < p-1
+        :param pt: A partial Diffie-Hellman key
+        :return: The shared secret point
+        """
+        return self.curve.iterate_point(pt, a)
 
     def encode(self, byte_arr):
         """
@@ -321,16 +337,29 @@ class ECCipher:
 
 
 def main():
-    # curve = EllipticCurve(1,1,23)
-    # for i in range(23):
-    #     print(i, " -> ", curve.get_y(i))
-    # print(curve.add_point(Point(0,1), Point(1,7)))
-    # for i in range(50):
-    #     print(i + 1, " -> ", curve.iterate_point(Point(0, 1), i + 1))
+    curve = EllipticCurve(1,1,23)
+    for i in range(23):
+        print(i, " -> ", curve.get_y(i))
+    print(curve.add_point(Point(0,1), Point(1,7)))
+    for i in range(50):
+        print(i + 1, " -> ", curve.iterate_point(Point(0, 1), i + 1))
 
     cipher = ECCipher(-1, 188, 751, Point(224, 503), 20)
 
+    a, pa = cipher.gen_key_pair()
+    print("Key a = (", a, "|", pa, ")")
     b, pb = cipher.gen_key_pair()
+    print("Key b = (", b, "|", pb, ")")
+
+    pa_t = cipher.gen_partial_key(a)
+    print("Partial Key a =", pa_t)
+    pb_t = cipher.gen_partial_key(b)
+    print("Partial Key b =", pb_t)
+
+    pa_s = cipher.gen_shared_key(a, pb_t)
+    print("Shared Key a =", pa_s)
+    pb_s = cipher.gen_shared_key(b, pa_t)
+    print("Shared Key b =", pb_s)
 
     print("\nPlaintext encoding")
     p_arr = cipher.encode([11, 12, 13, 14, 15])
