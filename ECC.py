@@ -1,5 +1,6 @@
 import math
 import sys
+import pickle
 import random
 from Point import Point
 
@@ -267,7 +268,7 @@ class ECCipher:
         """
         return self.curve.iterate_point(pt, a)
 
-    def encode(self, byte_arr):
+    def plain_encode(self, byte_arr):
         """
         Convert the given bytes array to an array of point
         :param byte_arr: A valid bytes array / int array where each element value is between 0-255
@@ -289,7 +290,7 @@ class ECCipher:
 
         return ret
 
-    def decode(self, point_arr):
+    def plain_decode(self, point_arr):
         """
         Convert the given point array to an array of bytes
         :param point_arr: A valid point array where each element exist in the curve used
@@ -299,7 +300,15 @@ class ECCipher:
         for point in point_arr:
             m = math.floor((point.X - 1) / self.k)
             ret.append(m)
-        return ret
+        return bytes(ret)
+
+    @staticmethod
+    def dump_points(enc_point_arr):
+        return pickle.dumps(enc_point_arr, protocol=pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def load_points(byte_arr):
+        return pickle.loads(byte_arr)
 
     def encrypt(self, point_arr, pb, k=None):
         """
@@ -362,11 +371,19 @@ def main():
     print("Shared Key b =", pb_s)
 
     print("\nPlaintext encoding")
-    p_arr = cipher.encode([11, 12, 13, 14, 15])
+    p_arr = cipher.plain_encode(bytes([11, 12, 13, 14, 15]))
     for point in p_arr: print(point)
 
     print("\nPlain-point enciphering")
     enc_p_arr = cipher.encrypt(p_arr, pb)
+    for point in enc_p_arr: print(point)
+
+    print("\nCipher-point encoding")
+    enc_b_arr = ECCipher.dump_points(enc_p_arr)
+    for byte in enc_b_arr: print(byte)
+
+    print("\nCiphertext decoding")
+    enc_p_arr = ECCipher.load_points(enc_b_arr)
     for point in enc_p_arr: print(point)
 
     print("\nCipher-point deciphering")
@@ -374,7 +391,7 @@ def main():
     for point in p_arr: print(point)
 
     print("\nPlain-point decoding")
-    b_arr = cipher.decode(p_arr)
+    b_arr = cipher.plain_decode(p_arr)
     for byte in b_arr: print(byte)
 
 if __name__ == "__main__":
