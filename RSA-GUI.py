@@ -1,6 +1,7 @@
 from tkinter import *
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, scrolledtext
 import rsa
+from os.path import isfile
 
 
 class Window:
@@ -17,6 +18,9 @@ class Window:
 
         # Component for tab key-generator
         self.initialize_key_generator()
+
+        # Component for tab encryption
+        self.initialize_encryption()
 
         # Bottom_Frame
         quit_button = Button(self.bottom_frame, text='Quit', command=master.destroy)
@@ -38,6 +42,7 @@ class Window:
         # show tabbed widgets
         self.tab_menu.pack(expand=1, fill="both")
 
+    # ALL ABOUT KEY GENERATOR TAB
     def initialize_key_generator(self):
         frame_key_generator = Frame(self.tab_key_generator)
         frame_key_generator.place(anchor='nw', relx=0.05, rely=0.05)
@@ -123,6 +128,90 @@ class Window:
         if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
             return
         text2save = self.private_key_d_entry.get() + "," + self.private_key_n_entry.get()
+        f.write(text2save)
+        f.close()
+
+    # ALL ABOUT ENCRYPTION
+    def initialize_encryption(self):
+        frame_encryption = Frame(self.tab_encrypt)
+        frame_encryption.place(anchor='nw', relx=0.05, rely=0)
+
+        # Label
+        plaintext_label = Label(frame_encryption, text="Plaintext: ")
+        plaintext_label.grid(row=0, column=0, padx=5, pady=2.5)
+
+        public_keys_label = Label(frame_encryption, text="Public Keys: ")
+        public_keys_label.grid(row=1, column=0, padx=5, pady=2.5)
+
+        encryption_result_label = Label(frame_encryption, text="Result: ")
+        encryption_result_label.grid(row=3, column=0, padx=5, pady=2.5)
+
+        # Entry
+        self.plaintext_entry = Entry(frame_encryption, width=50)
+        self.plaintext_entry.grid(row=0, column=1, padx=5, pady=2.5)
+
+        self.public_keys_entry = Entry(frame_encryption, width=50)
+        self.public_keys_entry.grid(row=1, column=1, padx=5, pady=2.5)
+
+        # message
+        self.encryption_result_message = scrolledtext.ScrolledText(frame_encryption, width=60, height=10)
+        self.encryption_result_message.grid(row=4, column=0, padx=5, pady=2.5, columnspan=20)
+
+        # Button
+        browse_plaintext_button = Button(frame_encryption, text="Browse", command=self.browse_plaintext)
+        browse_plaintext_button.grid(row=0, column=2, padx=5, pady=2.5)
+
+        browse_pubkey_button = Button(frame_encryption, text="Browse", command=self.browse_public_keys)
+        browse_pubkey_button.grid(row=1, column=2, padx=5, pady=2.5)
+
+        encrypt_button = Button(frame_encryption, text="Encrypt", command=self.encrypt)
+        encrypt_button.grid(row=2, column=0, padx=5, pady=2.5)
+
+        save_encrypted_button = Button(frame_encryption, text="Save", command=self.save_encrypted)
+        save_encrypted_button.grid(row=5, column=0, padx=5, pady=2.5)
+
+    def browse_plaintext(self):
+        f = filedialog.askopenfilename(initialdir="/", title="Select file")
+        self.plaintext_entry.delete(0, END)
+        self.plaintext_entry.insert(0, f)
+
+    def browse_public_keys(self):
+        f = filedialog.askopenfilename(initialdir="/", title="Select file")
+        self.public_keys_entry.delete(0, END)
+        self.public_keys_entry.insert(0, f)
+
+    def encrypt(self):
+        plaintext_path = self.plaintext_entry.get()
+        key_path = self.public_keys_entry.get()
+
+        try:
+            if len(plaintext_path) == 0 or len(key_path) == 0:
+                raise Exception("Please select the plaintext and public key !")
+            if not isfile(plaintext_path) or not isfile(key_path):
+                raise Exception("Cannot find the specified file !")
+
+            # Do Encryption here
+            with open(key_path, 'r') as infile:
+                key = infile.read()
+            public_key = int(key.split(',')[0]), int(key.split(',')[1])
+
+            cipher = rsa.RSA()
+            result = cipher.encrypt(plaintext_path, public_key)
+            result_string = " ".join([hex(x) for x in result])
+
+            self.encryption_result_message.delete(1.0, END)
+            self.encryption_result_message.insert(INSERT, result_string)
+
+        except Exception as e:
+            messagebox.showerror('Exception Caught', str(e))
+
+    def save_encrypted(self):
+        f = filedialog.asksaveasfile(initialdir="/", title="Select File",
+                                     mode='w', defaultextension=".enc",
+                                     filetypes=(("Encrypted File", "*.enc"), ("all files", "*.*")))
+        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        text2save = self.encryption_result_message.get(1.0, END)
         f.write(text2save)
         f.close()
 
