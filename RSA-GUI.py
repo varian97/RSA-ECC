@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog, scrolledtext
-import rsa
 from os.path import isfile
+import rsa
+import time
 
 
 class Window:
@@ -199,11 +200,17 @@ class Window:
             public_key = int(key.split(',')[0]), int(key.split(',')[1])
 
             cipher = rsa.RSA()
+            start = time.clock()
             result = cipher.encrypt(plaintext_path, public_key)
+            end = time.clock()
             result_string = " ".join([hex(x) for x in result])
 
             self.encryption_result_message.delete(1.0, END)
             self.encryption_result_message.insert(INSERT, result_string)
+
+            summary = "Elapsed = " + str(end-start) + " seconds\n"
+            summary += "File Size = " + str(len(result_string) + 2) + " bytes"
+            messagebox.showinfo("Summary", summary)
 
         except Exception as e:
             messagebox.showerror('Exception Caught', str(e))
@@ -283,11 +290,17 @@ class Window:
 
             # Do the decryption here
             cipher = rsa.RSA()
+            start = time.clock()
             result = cipher.decrypt(cipher_path, private_key)
+            end = time.clock()
             result_string = "".join(chr(x) for x in result)
 
             self.decryption_result_message.delete(1.0, END)
             self.decryption_result_message.insert(INSERT, result_string)
+
+            summary = "Elapsed = " + str(end - start) + " seconds\n"
+            summary += "File Size = " + str(len(result_string)) + " bytes"
+            messagebox.showinfo("Summary", summary)
 
         except Exception as e:
             messagebox.showerror("Exception Caught!", str(e))
