@@ -1,12 +1,12 @@
 import random
 from math import gcd as bltin_gcd
-from tkinter import filedialog
 
 
 def generate_random(length=100):
     lower_bound = 10 ** (length-1)
     upper_bound = (10 ** length) - 1
     return random.randint(lower_bound, upper_bound)
+
 
 def miller_rabin_test(d, n):
     a = random.randint(2, n-2)
@@ -26,6 +26,7 @@ def miller_rabin_test(d, n):
 
     return False
 
+
 def is_prime(n, k=10):
     if (n <= 1 or n == 4): return False
     if (n < 3): return True
@@ -38,6 +39,7 @@ def is_prime(n, k=10):
 
     return True
 
+
 # return gcd, x, y that satisfied ax + by = 1
 def egcd(a, b):
     if a == 0:
@@ -45,6 +47,7 @@ def egcd(a, b):
     else:
         g, y, x = egcd(b % a, a)
         return (g, x - (b // a) * y, y)
+
 
 def modinv(a, m):
     g, x, y = egcd(a, m)
@@ -81,10 +84,6 @@ class RSA(object):
 
         ciphertext = [pow(int(x), e, n) for x in content]
 
-        with open('README_OUTPUT.txt', 'w') as outfile:
-            ciphertext_hexed = [hex(x) for x in ciphertext]
-            outfile.write(" ".join(ciphertext_hexed))
-
         return ciphertext
 
     def decrypt(self, input_pathname, keys):
@@ -96,20 +95,4 @@ class RSA(object):
         content_integer = [int(x, 16) for x in content]
         plaintext = [pow(x, d, n) for x in content_integer]
 
-        '''with open(output_pathname, 'wb') as outfile:
-            outfile.write(bytes(plaintext))'''
-
         return plaintext
-
-
-if __name__ == "__main__":
-    rsa = RSA()
-    p = rsa.generate_prime(length=20)
-    q = rsa.generate_prime(length=20)
-    print("Prime number 1 = ", p)
-    print("Prime number 2 = ", q)
-
-    public_keys, private_keys = rsa.generate_keys(p, q)
-    ciphertext = rsa.encrypt('README.md', public_keys)
-    plaintext = rsa.decrypt('README_OUTPUT.txt', private_keys)
-    print("Plaintext = ", bytes(plaintext))

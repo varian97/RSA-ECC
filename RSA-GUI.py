@@ -22,6 +22,9 @@ class Window:
         # Component for tab encryption
         self.initialize_encryption()
 
+        # Component for tab decryption
+        self.initialize_decryption()
+
         # Bottom_Frame
         quit_button = Button(self.bottom_frame, text='Quit', command=master.destroy)
         quit_button.pack(side=RIGHT, padx=5)
@@ -213,6 +216,88 @@ class Window:
             return
         text2save = self.encryption_result_message.get(1.0, END)
         f.write(text2save)
+        f.close()
+
+    # ALL ABOUT DECRYPTION
+    def initialize_decryption(self):
+        frame_decryption = Frame(self.tab_decrypt)
+        frame_decryption.place(anchor='nw', relx=0.05, rely=0)
+
+        # Label
+        ciphertext_label = Label(frame_decryption, text="Ciphertext: ")
+        ciphertext_label.grid(row=0, column=0, padx=5.0, pady=2.5)
+
+        private_keys_label = Label(frame_decryption, text="Private Keys: ")
+        private_keys_label.grid(row=1, column=0, padx=5.0, pady=2.5)
+
+        decryption_result_label = Label(frame_decryption, text="Result: ")
+        decryption_result_label.grid(row=3, column=0, padx=5, pady=2.5)
+
+        # Entry
+        self.ciphertext_entry = Entry(frame_decryption, width=50)
+        self.ciphertext_entry.grid(row=0, column=1, padx=5.0, pady=2.5)
+
+        self.private_keys_entry = Entry(frame_decryption, width=50)
+        self.private_keys_entry.grid(row=1, column=1, padx=5.0, pady=2.5)
+
+        # message
+        self.decryption_result_message = scrolledtext.ScrolledText(frame_decryption, width=60, height=10)
+        self.decryption_result_message.grid(row=4, column=0, padx=5, pady=2.5, columnspan=20)
+
+        # Button
+        browse_ciphertext_button = Button(frame_decryption, text="Browse", command=self.browse_ciphertext)
+        browse_ciphertext_button.grid(row=0, column=2, padx=5.0, pady=2.5)
+
+        browse_prikey_button = Button(frame_decryption, text="Browse", command=self.browse_private_keys)
+        browse_prikey_button.grid(row=1, column=2, padx=5.0, pady=2.5)
+
+        decrypt_button = Button(frame_decryption, text="Decrypt", command=self.decrypt)
+        decrypt_button.grid(row=2, column=0, padx=5.0, pady=2.5)
+
+        save_decrypted_button = Button(frame_decryption, text="Save", command=self.save_decrypted)
+        save_decrypted_button.grid(row=5, column=0, padx=5, pady=2.5)
+
+    def browse_ciphertext(self):
+        f = filedialog.askopenfilename(initialdir="/", title="Select file")
+        self.ciphertext_entry.delete(0, END)
+        self.ciphertext_entry.insert(0, f)
+
+    def browse_private_keys(self):
+        f = filedialog.askopenfilename(initialdir="/", title="Select file")
+        self.private_keys_entry.delete(0, END)
+        self.private_keys_entry.insert(0, f)
+
+    def decrypt(self):
+        cipher_path = self.ciphertext_entry.get()
+        key_path = self.private_keys_entry.get()
+
+        try:
+            if len(cipher_path) == 0 or len(key_path) == 0:
+                raise Exception("Please select the plaintext and public key !")
+            if not isfile(cipher_path) or not isfile(key_path):
+                raise Exception("Cannot find the specified file !")
+
+            with open(key_path, 'r') as infile:
+                key = infile.read()
+            private_key = int(key.split(",")[0]), int(key.split(",")[1])
+
+            # Do the decryption here
+            cipher = rsa.RSA()
+            result = cipher.decrypt(cipher_path, private_key)
+            result_string = "".join(chr(x) for x in result)
+
+            self.decryption_result_message.delete(1.0, END)
+            self.decryption_result_message.insert(INSERT, result_string)
+
+        except Exception as e:
+            messagebox.showerror("Exception Caught!", str(e))
+
+    def save_decrypted(self):
+        f = filedialog.asksaveasfile(initialdir="/", title="Select File", mode='wb')
+        if f is None:
+            return
+        text2save = [(ord(x)) for x in self.decryption_result_message.get(1.0, END)]
+        f.write(bytes(text2save))
         f.close()
 
 
