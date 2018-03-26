@@ -117,8 +117,8 @@ class Window:
 
     def save_public_keys(self):
         f = filedialog.asksaveasfile(initialdir="/", title="Select File",
-                                     mode='w', defaultextension=".pub",
-                                     filetypes=(("public keys", "*.pub"), ("all files", "*.*")))
+                                     mode='w', defaultextension=".rpub",
+                                     filetypes=(("rsa public keys", "*.rpub"), ("all files", "*.*")))
         if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
             return
         text2save = self.public_key_e_entry.get() + "," + self.public_key_n_entry.get()
@@ -127,8 +127,8 @@ class Window:
 
     def save_private_keys(self):
         f = filedialog.asksaveasfile(initialdir="/", title="Select File",
-                                     mode='w', defaultextension=".pri",
-                                     filetypes=(("private keys", "*.pri"), ("all files", "*.*")))
+                                     mode='w', defaultextension=".rpri",
+                                     filetypes=(("rsa private keys", "*.rpri"), ("all files", "*.*")))
         if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
             return
         text2save = self.private_key_d_entry.get() + "," + self.private_key_n_entry.get()
@@ -217,8 +217,8 @@ class Window:
 
     def save_encrypted(self):
         f = filedialog.asksaveasfile(initialdir="/", title="Select File",
-                                     mode='w', defaultextension=".enc",
-                                     filetypes=(("Encrypted File", "*.enc"), ("all files", "*.*")))
+                                     mode='w', defaultextension=".rsa",
+                                     filetypes=(("RSA File", "*.rsa"), ("all files", "*.*")))
         if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
             return
         text2save = self.encryption_result_message.get(1.0, END)
