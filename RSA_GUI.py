@@ -280,7 +280,7 @@ class Window:
 
         try:
             if len(cipher_path) == 0 or len(key_path) == 0:
-                raise Exception("Please select the plaintext and public key !")
+                raise Exception("Please select the ciphertext and private key !")
             if not isfile(cipher_path) or not isfile(key_path):
                 raise Exception("Cannot find the specified file !")
 
