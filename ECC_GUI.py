@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox, scrolledtext
 import ECC
 from Point import Point
 from os.path import isfile
+import sys
 import time
 
 
@@ -132,6 +133,10 @@ class Window:
             cipher = ECC.ECCipher(a, b, p, g)
             private_key, public_key = cipher.gen_key_pair()
 
+            self.private_key_entry.delete(0, END)
+            self.public_key_entry_x.delete(0, END)
+            self.public_key_entry_y.delete(0, END)
+
             self.private_key_entry.insert(0, str(private_key))
             self.public_key_entry_x.insert(0, str(public_key.X))
             self.public_key_entry_y.insert(0, str(public_key.Y))
@@ -258,7 +263,7 @@ class Window:
             self.encryption_result_message.insert(INSERT, ciphertext_for_print)
 
             summary = "Elapsed = " + str(end - start) + " seconds\n"
-            summary += "File Size = " + str(len(ciphertext_for_print) + 2) + " bytes"
+            summary += "File Size = " + str(sys.getsizeof(self.ciphertext)) + " bytes"
             messagebox.showinfo("Summary", summary)
 
         except Exception as e:
@@ -368,7 +373,7 @@ class Window:
             self.decryption_result_message.insert(INSERT, plaintext)
 
             summary = "Elapsed = " + str(end - start) + " seconds\n"
-            summary += "File Size = " + str(len(plain_point) + 2) + " bytes"
+            summary += "File Size = " + str(len(plain_point)) + " bytes"
             messagebox.showinfo("Summary", summary)
 
         except Exception as e:

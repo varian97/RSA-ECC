@@ -107,6 +107,11 @@ class Window:
             q = cipher.generate_prime(length=int(self.random_length_entry_q.get()))
             public_keys, private_keys = cipher.generate_keys(p, q)
 
+            self.public_key_e_entry.delete(0, END)
+            self.public_key_n_entry.delete(0, END)
+            self.private_key_d_entry.delete(0, END)
+            self.private_key_n_entry.delete(0, END)
+
             self.public_key_e_entry.insert(0, str(public_keys[0]))
             self.public_key_n_entry.insert(0, str(public_keys[1]))
             self.private_key_d_entry.insert(0, str(private_keys[0]))
@@ -203,13 +208,13 @@ class Window:
             start = time.clock()
             result = cipher.encrypt(plaintext_path, public_key)
             end = time.clock()
-            result_string = " ".join([hex(x) for x in result])
+            self.result_string = " ".join([hex(x) for x in result])
 
             self.encryption_result_message.delete(1.0, END)
-            self.encryption_result_message.insert(INSERT, result_string)
+            self.encryption_result_message.insert(INSERT, self.result_string)
 
             summary = "Elapsed = " + str(end-start) + " seconds\n"
-            summary += "File Size = " + str(len(result_string) + 2) + " bytes"
+            summary += "File Size = " + str(len(self.result_string) + 2) + " bytes"
             messagebox.showinfo("Summary", summary)
 
         except Exception as e:
@@ -221,7 +226,7 @@ class Window:
                                      filetypes=(("RSA File", "*.rsa"), ("all files", "*.*")))
         if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
             return
-        text2save = self.encryption_result_message.get(1.0, END)
+        text2save = self.result_string
         f.write(text2save)
         f.close()
 
