@@ -242,6 +242,20 @@ class ECCipher:
         self.g = g
         self.k = k
 
+        self.encode = []
+        for byte in range(256):
+
+            for i in range(1, self.k):
+                x = byte * self.k + i
+                ys = self.curve.get_y(x)
+
+                if ys:
+                    self.encode.append(Point(x, ys[i % 2]))
+                    break
+
+                elif i == self.k - 1:
+                    sys.exit("Well this is unfortunate")
+
     def gen_key_pair(self):
         """
         :return: private key, public key tuple
@@ -274,17 +288,7 @@ class ECCipher:
         """
         ret = []
         for m in byte_arr:
-
-            for i in range(1, self.k):
-                x = m * self.k + i
-                ys = self.curve.get_y(x)
-
-                if ys:
-                    ret.append(Point(x, ys[i % 2]))
-                    break
-
-                elif i == self.k - 1:
-                    sys.exit("Well this is unfortunate")
+            ret.append(self.encode[m])
 
         return ret
 
