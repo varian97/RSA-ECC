@@ -11,11 +11,10 @@ class EllipticCurve:
     """
 
     @staticmethod
-    def legendre_symbol(a, p):
+    def is_quadratic_residue(a, p):
         """
         Legendre symbol (http://en.wikipedia.org/wiki/Legendre_symbol)
         Define if a is a quadratic residue modulo odd prime
-        from https://codereview.stackexchange.com/questions/43210/tonelli-shanks-algorithm-implementation-of-prime-modular-square-root
         """
         ls = pow(int(a), int((p - 1) / 2), p)
         if ls == p - 1:
@@ -27,7 +26,6 @@ class EllipticCurve:
         """
         Square root modulo prime number (http://en.wikipedia.org/wiki/Tonelli-Shanks_algorithm)
         Solve the equation [ x^2 = a mod p ] and return list of x solution
-        from https://codereview.stackexchange.com/questions/43210/tonelli-shanks-algorithm-implementation-of-prime-modular-square-root
         """
         a %= p
 
@@ -38,7 +36,7 @@ class EllipticCurve:
             return [a]
 
         # Check solution existence on odd prime
-        if EllipticCurve.legendre_symbol(a, p) != 1:
+        if EllipticCurve.is_quadratic_residue(a, p) != 1:
             return []
 
         # Simple case
@@ -52,9 +50,9 @@ class EllipticCurve:
             s += 1
             q //= 2
 
-        # Select a z which is a quadratic non resudue modulo p
+        # Select a z which is a quadratic non residue modulo p
         z = 1
-        while EllipticCurve.legendre_symbol(z, p) != -1:
+        while EllipticCurve.is_quadratic_residue(z, p) != -1:
             z += 1
         c = pow(z, q, p)
 
