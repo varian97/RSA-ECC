@@ -353,7 +353,7 @@ def main():
     for i in range(50):
         print(i + 1, " -> ", curve.iterate_point(Point(0, 1), i + 1))
 
-    cipher = ECCipher(-1, 188, 751, Point(224, 503), 20)
+    cipher = ECCipher(-1, 188, 7919, Point(224, 503), 20)
 
     a, pa = cipher.gen_key_pair()
     print("Key a = (", a, "|", pa, ")")
@@ -371,7 +371,7 @@ def main():
     print("Shared Key b =", pb_s)
 
     print("\nPlaintext encoding")
-    p_arr = cipher.plain_encode(bytes([11, 12, 13, 14, 15]))
+    p_arr = cipher.plain_encode(bytes(b"Varian"))
     for point in p_arr: print(point)
 
     print("\nPlain-point enciphering")
